@@ -2,6 +2,7 @@
 #define HEAP_H
 #include <functional>
 #include <stdexcept>
+#include <vector>
 
 template <typename T, typename PComparator = std::less<T> >
 class Heap
@@ -61,13 +62,38 @@ public:
 
 private:
   /// Add whatever helper functions and data members you need below
-
-
-
-
+  std::vector<T> data;
+  int m;
+  PComparator c;
+  void heapify_up(size_t index);
+  void heapify_down(size_t index);
 };
 
 // Add implementation of member functions here
+template <typename T, typename PComparator>
+Heap<T, PComparator>::Heap(int m, PComparator c) : m(m), c(c)
+{}
+
+
+template <typename T, typename PComparator>
+Heap<T, PComparator>::~Heap()
+{
+
+}
+
+
+template <typename T, typename PComparator>
+bool Heap<T, PComparator>::empty() const
+{
+    return data.empty();
+}
+
+
+template <typename T, typename PComparator>
+size_t Heap<T, PComparator>::size() const
+{
+  return data.size();
+}
 
 
 // We will start top() for you to handle the case of 
@@ -81,14 +107,12 @@ T const & Heap<T,PComparator>::top() const
     // ================================
     // throw the appropriate exception
     // ================================
-
+    throw std::underflow_error("Empty heap");
 
   }
   // If we get here we know the heap has at least 1 item
   // Add code to return the top element
-
-
-
+  return data[0];
 }
 
 
@@ -101,12 +125,56 @@ void Heap<T,PComparator>::pop()
     // ================================
     // throw the appropriate exception
     // ================================
-
-
+    throw std::underflow_error("Empty heap");
   }
 
+  std::swap(data[0], data.back());
+  data.pop_back();
+  if (!empty()) {
+    heapify_down(0);   // must restore heap
+  }
+}
 
 
+template <typename T, typename PComparator>
+void Heap<T, PComparator>::push(const T& item)
+{
+  data.push_back(item);
+  heapify_up(data.size() - 1);    // must restore heap
+} 
+
+
+template <typename T, typename PComparator>
+void Heap<T, PComparator>::heapify_up(size_t index)
+{
+  if (index == 0) {
+    return;
+  }
+
+  size_t parent = (index - 1) / m;
+  if (c(data[index], data[parent])) {
+    std::swap(data[index], data[parent]);
+    heapify_up(parent);
+  }
+}
+
+
+template <typename T, typename PComparator>
+void Heap<T, PComparator>::heapify_down(size_t index)
+{
+  size_t best = index;
+
+  for (int i=1; i <= m; ++i) {
+    size_t child = m * index + i;
+    if (child < data.size() && c(data[child], data[best])) {
+      best = child;
+    }
+  }
+
+  if (best != index) {
+    std::swap(data[index], data[best]);
+    heapify_down(best);
+  }
 }
 
 
